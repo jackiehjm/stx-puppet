@@ -42,6 +42,13 @@ class platform::strongswan::swanctl_config (
         connections => $connections,
     }),
   }
+  # Enable coutomized config folder for pod to pod IPsec
+  -> file_line { 'include_conf_d':
+    path  => '/etc/swanctl/swanctl.conf',
+    line  => 'include conf.d/*.conf',
+    match => '^include conf.d/\*\.conf$',
+    append_on_no_match => true,
+    }
 
   # If connections_active is not empty, the node is a controller.
   # For controller node, the swanctl.conf will be a symlink to
@@ -78,6 +85,13 @@ class platform::strongswan::swanctl_config (
     }
     -> exec { "Symlink ${swanctl_current_conf}":
       command => "/usr/bin/ln -sf ${swanctl_config} ${swanctl_current_conf}",
+    }
+    # Enable coutomized config folder for pod to pod IPsec
+    -> file_line { 'include_conf_d_controller':
+      path  => $swanctl_config,
+      line  => 'include conf.d/*.conf',
+      match => '^include conf.d/\*\.conf$',
+      append_on_no_match => true,
     }
   }
 }
